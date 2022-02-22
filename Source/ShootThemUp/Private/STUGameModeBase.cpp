@@ -32,6 +32,7 @@ void ASTUGameModeBase::StartPlay()
 
     SpawnBots();
     CreateTeamsInfo();
+    ResetPlayers();
     CurrentRound = 1;
     StartRound();
     SetMatchState(ESTUMatchState::InProgress);
@@ -40,20 +41,11 @@ void ASTUGameModeBase::StartPlay()
 void ASTUGameModeBase::SpawnBots()
 {
     if (!GetWorld()) return;
-    int32 Team = 1;
     for (int32 i = 0; i < GameData.PlayersNum - 1; ++i)
     {
        FActorSpawnParameters SpawnInfo;
        SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
        const auto STUAIController = GetWorld()->SpawnActor<AAIController>(AIControllerClass, SpawnInfo);
-
-       UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
-       
-       if (Team == 1)
-           RestartPlayerAtPlayerStart(STUAIController, Starts[0]);
-       else if (Team == 2)
-           RestartPlayerAtPlayerStart(STUAIController, Starts[1]);
-       Team = Team == 1 ? 2 : 1;
     }
 }
 
@@ -108,10 +100,15 @@ void  ASTUGameModeBase::ResetOnePlayer(AController* Controller)
     const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
     if (!PlayerState) return;
 
-    if (PlayerState->GetTeamID() == 1)
-        RestartPlayerAtPlayerStart(Controller, Starts[0]);
-    else if (PlayerState->GetTeamID() == 2)
-        RestartPlayerAtPlayerStart(Controller, Starts[1]);
+    for (auto Start : Starts)
+    {
+        const auto PlayerStart = Cast<APlayerStart>(Start);
+
+        if (PlayerState->GetTeamID() == 1 && PlayerStart->PlayerStartTag == FName("BLUE"))
+            RestartPlayerAtPlayerStart(Controller, PlayerStart);
+        else if (PlayerState->GetTeamID() == 2 && PlayerStart->PlayerStartTag == FName("RED"))
+            RestartPlayerAtPlayerStart(Controller, PlayerStart);
+    }
 
     SetPlayerColor(Controller);
 }
@@ -120,6 +117,7 @@ void ASTUGameModeBase::CreateTeamsInfo()
 {
     if (!GetWorld()) return;
     int32 TeamID = 1;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
     for (auto It = GetWorld()->GetControllerIterator(); It; ++It)
     {
         const auto Controller = It->Get();
@@ -131,6 +129,18 @@ void ASTUGameModeBase::CreateTeamsInfo()
         PlayerState->SetTeamColor(DetermineColorByTeamID(TeamID));
         PlayerState->SetPlayerName(Controller->IsPlayerController() ? "Player" : "Bot");
         SetPlayerColor(Controller);
+        
+
+        
+        /*for (auto Start : Starts)
+        {
+            const auto PlayerStart = Cast<APlayerStart>(Start);
+
+            if (PlayerState->GetTeamID() == 1 && PlayerStart->PlayerStartTag == FName("RED"))
+                RestartPlayerAtPlayerStart(Controller, PlayerStart);
+            else if (PlayerState->GetTeamID() == 2 && PlayerStart->PlayerStartTag == FName("BLUE"))
+                RestartPlayerAtPlayerStart(Controller, PlayerStart);
+        }*/
         TeamID = TeamID == 1 ? 2 : 1;
     }
 
