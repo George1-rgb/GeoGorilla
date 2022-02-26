@@ -3,18 +3,47 @@
 
 #include "Menu/UI/STUMenuHUD.h"
 #include "UI/STUBaseWidget.h"
-
+#include "Menu/STUMenuGameModeBase.h"
 void ASTUMenuHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (MenuWidgetClass)
-	{
-		const auto MenuWidget = CreateWidget<USTUBaseWidget>(GetWorld(), MenuWidgetClass);
-		if (MenuWidget)
-		{
-			MenuWidget->AddToViewport();
-			MenuWidget->Show();
-		}
-	}
+    MenuWidgets.Add(ESTUMenuState::MainMenu, CreateWidget<USTUBaseWidget>(GetWorld(), MenuWidgetClass));
+    MenuWidgets.Add(ESTUMenuState::Loading, CreateWidget<USTUBaseWidget>(GetWorld(), LoadingWidgetClass));
+
+    for (auto MenuWidgetPair : MenuWidgets)
+    {
+        const auto MenuWidget = MenuWidgetPair.Value;
+        if (!MenuWidget) continue;
+        MenuWidget->AddToViewport();
+        MenuWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (GetWorld())
+    {
+        const auto GameMode = Cast<ASTUMenuGameModeBase>(GetWorld()->GetAuthGameMode());
+        if (GameMode)
+        {
+            GameMode->OnMenuStateChanged.AddUObject(this, &ASTUMenuHUD::OnMenuStateChanged);
+        }
+    }
+}
+
+void ASTUMenuHUD::OnMenuStateChanged(ESTUMenuState State)
+{
+    if (CurrentWidget)
+    {
+        CurrentWidget->SetVisibility(ESlateVisibility::Hidden);
+    }
+
+    if (MenuWidgets.Contains(State))
+    {
+        CurrentWidget = MenuWidgets[State];
+    }
+
+    if (CurrentWidget)
+    {
+        CurrentWidget->SetVisibility(ESlateVisibility::Visible);
+        CurrentWidget->Show();
+    }
 }

@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "STUGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Menu/STUMenuGameModeBase.h"
 DEFINE_LOG_CATEGORY_STATIC(LogSTUMenuWidget, All, All);
 void USTUMenuWidget::NativeOnInitialized()
 {
@@ -21,8 +22,17 @@ void USTUMenuWidget::NativeOnInitialized()
 
 void USTUMenuWidget::OnStartGame()
 {
-
 	if (!GetWorld()) return;
+	const auto GameMode = Cast<ASTUMenuGameModeBase>(GetWorld()->GetAuthGameMode());	
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &USTUMenuWidget::StartGame, 3, false);
+	GameMode->SetMenuLoading();
+}
+
+void USTUMenuWidget::StartGame()
+{
+	if (!GetWorld()) return;
+
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 
 	const auto STUGameInstance = GetWorld()->GetGameInstance<USTUGameInstance>();
 	if (!STUGameInstance) return;

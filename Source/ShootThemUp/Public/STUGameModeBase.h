@@ -35,7 +35,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Game")
         TSubclassOf<AAIController> AIControllerClass;
 
-        
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Levels")
+        TArray<FName> LevelNames;
 
     UPROPERTY(EditDefaultsOnly, Category = "Game")
         FGameData GameData;
@@ -62,6 +63,7 @@ private:
 
     void LogPlayerInfo();
     void StartRespawn(AController* Controller);
+    void LoadLevel();
 
     void GameOver();
 

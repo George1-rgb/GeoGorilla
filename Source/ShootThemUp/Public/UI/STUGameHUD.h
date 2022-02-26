@@ -25,6 +25,9 @@ protected:
       UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
           TSubclassOf<UUserWidget> GameOverWidgetClass;
 
+      UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+          TSubclassOf<UUserWidget> LoadingWidgetClass;
+
       virtual void BeginPlay() override;
 
 private:

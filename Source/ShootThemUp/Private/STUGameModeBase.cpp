@@ -29,13 +29,24 @@ ASTUGameModeBase::ASTUGameModeBase() {
 void ASTUGameModeBase::StartPlay()
 {
     Super::StartPlay();
-
+    LoadLevel();
     SpawnBots();
     CreateTeamsInfo();
     ResetPlayers();
     CurrentRound = 1;
     StartRound();
     SetMatchState(ESTUMatchState::InProgress);
+}
+
+void ASTUGameModeBase::LoadLevel()
+{
+    SetMatchState(ESTUMatchState::Loading);
+    FLatentActionInfo LatentInfo;
+    for (auto LevelName : LevelNames)
+    {
+        UGameplayStatics::LoadStreamLevel(GetWorld(), LevelName, true, true, LatentInfo);
+        UE_LOG(LogBaseGameMode, Display, TEXT("Loading %s successfull!"), *LevelName.ToString());
+    }
 }
 
 void ASTUGameModeBase::SpawnBots()
@@ -243,10 +254,7 @@ bool ASTUGameModeBase::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDel
     if (PauseSet)
     {
         SetMatchState(ESTUMatchState::Pause);
-    }
-
-    
-
+    } 
     return PauseSet;
 }
 bool ASTUGameModeBase::ClearPause()

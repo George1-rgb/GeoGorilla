@@ -18,12 +18,20 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 		UButton* QuitGameButton;
 
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+		UWidgetAnimation* LoadAnimation;
+
 	virtual void NativeOnInitialized() override;
 
 private:
+
+	FTimerHandle TimerHandle;
+
 	UFUNCTION()
 	void OnStartGame();
 
 	UFUNCTION()
 	void OnQuitGame();
+
+	void StartGame();
 };

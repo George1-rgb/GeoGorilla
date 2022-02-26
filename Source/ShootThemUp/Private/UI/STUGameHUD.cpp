@@ -5,7 +5,7 @@
 #include "Engine/Canvas.h"
 #include "UI/STUBaseWidget.h"
 #include "STUGameModeBase.h"
-
+#include "Kismet/GameplayStatics.h"
 DEFINE_LOG_CATEGORY_STATIC(LogSTUGameHUD, All, All);
 
 void ASTUGameHUD::DrawHUD() 
@@ -23,6 +23,7 @@ void ASTUGameHUD::BeginPlay()
     GameWidgets.Add(ESTUMatchState::InProgress, CreateWidget<USTUBaseWidget>(GetWorld(), PlayerHUDWidgetClass));
     GameWidgets.Add(ESTUMatchState::Pause, CreateWidget<USTUBaseWidget>(GetWorld(), PauseHUDWidgetClass));
     GameWidgets.Add(ESTUMatchState::GameOver, CreateWidget<USTUBaseWidget>(GetWorld(), GameOverWidgetClass));
+    GameWidgets.Add(ESTUMatchState::Loading, CreateWidget<USTUBaseWidget>(GetWorld(), LoadingWidgetClass));
 
     for (auto GameWidgetPair : GameWidgets)
     {
@@ -39,7 +40,7 @@ void ASTUGameHUD::BeginPlay()
         {
             GameMode->OnMatchStateChanged.AddUObject(this, &ASTUGameHUD::OnMatchStateChanged);
         }
-    }
+    } 
 }
 
 void ASTUGameHUD::DrawCrossHair() 

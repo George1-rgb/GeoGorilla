@@ -107,7 +107,18 @@ enum class ESTUMatchState : uint8
     WaitingToStart = 0,
     InProgress,
     Pause,
-    GameOver
+    GameOver,
+    Loading
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMatchStateChangedSignature, ESTUMatchState);
+
+UENUM(BlueprintType)
+enum class ESTUMenuState : uint8
+{
+    WaitingToStart = 0,
+    MainMenu,
+    Loading
+};
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuStateChangedSignature, ESTUMenuState);
