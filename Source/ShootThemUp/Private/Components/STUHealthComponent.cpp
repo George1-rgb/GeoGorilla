@@ -41,8 +41,18 @@ void USTUHealthComponent::OnTakeAnyDamage(
 {
     if (DamageType != GetDefault<UDamageType>())
         return;
+
     if (Damage <= 0.0f || IsDead() || !GetWorld())
         return;
+
+    ASTUPlayerCharacter* pPlayerCharacter = nullptr;
+    if (DamageCauser)
+        pPlayerCharacter = Cast<ASTUPlayerCharacter>(DamageCauser->GetOwner());
+
+
+    if (pPlayerCharacter)
+        pPlayerCharacter->MakeDamage();
+
 
     SetHealth(Health - Damage);
 
@@ -57,13 +67,13 @@ void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, 
 
     if (Damage <= 0.0f || IsDead() || !GetWorld())
         return;
-    ASTUPlayerCharacter* pPlayerCharacter = nullptr;
-    if (DamageCauser)
-        pPlayerCharacter = Cast<ASTUPlayerCharacter>(DamageCauser->GetOwner());
+	ASTUPlayerCharacter* pPlayerCharacter = nullptr;
+	if (DamageCauser)
+		pPlayerCharacter = Cast<ASTUPlayerCharacter>(DamageCauser->GetOwner());
 
-    
-    if (pPlayerCharacter)
-        pPlayerCharacter->MakeDamage();
+
+	if (pPlayerCharacter)
+		pPlayerCharacter->MakeDamage();
 
     if (BoneName == HeadShotBoneName)
     {
@@ -80,11 +90,19 @@ void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, 
 void USTUHealthComponent::OnTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, 
     class AController* InstigatedBy, AActor* DamageCauser)
 {
+    if (Damage <= 0.0f || IsDead() || !GetWorld())
+        return;
+
     if (DamageType != GetDefault<UProjectTileDamageType>())
         return;
 
-    if (Damage <= 0.0f || IsDead() || !GetWorld())
-        return;
+    ASTUPlayerCharacter* pPlayerCharacter = nullptr;
+    if (DamageCauser)
+        pPlayerCharacter = Cast<ASTUPlayerCharacter>(DamageCauser->GetOwner());
+
+
+    if (pPlayerCharacter)
+        pPlayerCharacter->MakeDamage();
 
     SetHealth(Health - Damage);
 

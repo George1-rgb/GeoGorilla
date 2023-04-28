@@ -58,7 +58,7 @@ void ASTUProjecttile::OnProjectileHit(
         this,                                       //
         GetController(),                            //
         DoFullDamage);
-    //DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+   // DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
     WeaponFXComponent->PlayImpactFX(Hit);
     if (FireSound)
         UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());

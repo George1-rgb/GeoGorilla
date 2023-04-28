@@ -94,7 +94,7 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
         return Data.WeaponClass == CurrentWeapon->GetClass();                                //
     });
     CurrentReloadAnimMontage = CurrentWeaponData ? CurrentWeaponData->ReloadAnimMontage : nullptr;
-
+    CurrentReloadSound = CurrentWeaponData ? CurrentWeaponData->ReloadSound : nullptr;
     AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponEquipSocketName);
     EquipAnimInProgress = true;
     PlayAnimMontage(EquipAnimMontage);
@@ -235,6 +235,8 @@ void USTUWeaponComponent::ChangeClip()
 
     ReloadAnimInProgress = true;
     PlayAnimMontage(CurrentReloadAnimMontage);
+    if (CurrentReloadSound)
+        UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentReloadSound, CurrentWeapon->GetActorLocation());
     CurrentWeapon->ChangeClip();
 }
 

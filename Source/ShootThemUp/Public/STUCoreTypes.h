@@ -3,6 +3,7 @@
 
 // weapon
 class ASTUBaseWeapon;
+class USoundBase;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature, ASTUBaseWeapon*);
 
@@ -31,6 +32,9 @@ struct FWeaponData
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     UAnimMontage* ReloadAnimMontage;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    USoundBase* ReloadSound;
 };
 
 USTRUCT(BlueprintType)

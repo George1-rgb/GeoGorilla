@@ -40,8 +40,14 @@ protected:
     UPROPERTY(meta = (BindWidgetAnim), Transient)
     UWidgetAnimation* HitAnimation;
 
+    UPROPERTY(meta = (BindWidgetAnim), Transient)
+    UWidgetAnimation* HeadShotAnimation;
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
     USoundBase* DamageMakeSound;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundBase* HeadShotSound;
 
     virtual void NativeOnInitialized() override;
 

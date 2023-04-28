@@ -43,8 +43,6 @@ void USTUMenuWidget::StartGame()
 		return;
 	}
 	UGameplayStatics::OpenLevel(this, STUGameInstance->GetStartupLevelName());
-	//FLatentActionInfo LatentInfo;
-	//UGameplayStatics::LoadStreamLevel(GetWorld(), STUGameInstance->GetStartupLevelName(), true, true, LatentInfo);
 }
 
 void USTUMenuWidget::OnQuitGame()

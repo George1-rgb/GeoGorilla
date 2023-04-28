@@ -87,7 +87,12 @@ void USTUPlayerHUDWidget::OnDamageActor()
 
 void USTUPlayerHUDWidget::OnHeadShot()
 {
-
+    if (!IsAnimationPlaying(HeadShotAnimation))
+    {
+        PlayAnimation(HeadShotAnimation);
+    }
+    if (HeadShotSound)
+        UGameplayStatics::PlaySound2D(GetWorld(), HeadShotSound);
 }
 
 void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)

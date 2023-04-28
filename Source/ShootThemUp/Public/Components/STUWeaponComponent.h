@@ -63,6 +63,8 @@ private:
     UPROPERTY()
     UAnimMontage* CurrentReloadAnimMontage = nullptr;
 
+    UPROPERTY()
+    USoundBase* CurrentReloadSound = nullptr;
    
     bool EquipAnimInProgress = false;
     bool ReloadAnimInProgress = false;
