@@ -9,8 +9,7 @@
 #include "NiagaraComponent.h"
 #include "Camera/CameraShakeBase.h"
 #include "Kismet/GameplayStatics.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogRifileWeapon, All, All);
+#include "Weapon/STUProjecttile.h"
 
 ASTURifileWeapon::ASTURifileWeapon() 
 {
@@ -41,12 +40,38 @@ void ASTURifileWeapon::StopFire()
 
 void ASTURifileWeapon::MakeShot()
 {
+	/* Super::MakeShot();
+	 if (!GetWorld() || IsAmmoEmpty())
+	 {
+		 StopFire();
+		 return;
+	 }
+
+	 FVector TraceStart, TraceEnd;
+	 if (!GetTraceData(TraceStart, TraceEnd))
+	 {
+		 StopFire();
+		 return;
+	 }
+	 FHitResult HitResult;
+	 MakeHit(HitResult, TraceStart, TraceEnd);
+	 PlayCameraShake();
+	 FVector TraceFXEnd = TraceEnd;
+
+	 if (HitResult.bBlockingHit)
+	 {
+		 TraceEnd = HitResult.ImpactPoint;
+		 MakeDamage(HitResult);
+		 WeaponFXComponent->PlayImpactFX(HitResult);
+	 }
+	 SpawnTraceFX(GetMuzzleWorldLocation(), TraceFXEnd);
+	 if (FireSound)
+		 UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	 DecreaseAmmo();*/
+
     Super::MakeShot();
     if (!GetWorld() || IsAmmoEmpty())
-    {
-        StopFire();
         return;
-    }
 
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd))
@@ -57,18 +82,23 @@ void ASTURifileWeapon::MakeShot()
     FHitResult HitResult;
     MakeHit(HitResult, TraceStart, TraceEnd);
     PlayCameraShake();
-    FVector TraceFXEnd = TraceEnd;
+    const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
+    const FVector Direction = (EndPoint - GetMuzzleWorldLocation()).GetSafeNormal();
 
-    if (HitResult.bBlockingHit)
+    const FTransform SpawnTransform(FRotator::ZeroRotator, GetMuzzleWorldLocation());
+    ASTUProjecttile* Projecttile = GetWorld()->SpawnActorDeferred<ASTUProjecttile>(ProjecttileClass, SpawnTransform);
+    if (Projecttile)
     {
-        TraceEnd = HitResult.ImpactPoint;
-        MakeDamage(HitResult);
-        WeaponFXComponent->PlayImpactFX(HitResult);
+        Projecttile->SetShotDirection(Direction);
+        Projecttile->SetHitResult(HitResult);
+        Projecttile->SetOwner(GetOwner());
+        Projecttile->FinishSpawning(SpawnTransform);
+
     }
-    SpawnTraceFX(GetMuzzleWorldLocation(), TraceFXEnd);
+    DecreaseAmmo();
     if (FireSound)
         UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-    DecreaseAmmo();
+    //SpawnMuzzleFX();
 }
 
 bool ASTURifileWeapon::GetTraceData(FVector& TraceStart, FVector& TraceEnd) const

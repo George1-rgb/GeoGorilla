@@ -32,7 +32,9 @@ public:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "UI")
     void OnTakeDamage();
-   
+    
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool IsShowCross() const;
 protected:
     UPROPERTY(meta = (BindWidgetAnim), Transient)
     UWidgetAnimation* DamageAnimation;
@@ -56,4 +58,7 @@ private:
     void OnNewPawn(APawn* NewPawn);
 	void OnDamageActor();
     void OnHeadShot();
+    void OnAiming(bool bAiming);
+
+    bool m_bAiming = false;
 };

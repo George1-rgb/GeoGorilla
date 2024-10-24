@@ -11,7 +11,7 @@
 class USTUWeaponFXComponent;
 class UNiagaraComponent;
 class UNiagaraSystem;
-
+class ASTUProjecttile;
 UCLASS()
 class SHOOTTHEMUP_API ASTURifileWeapon : public ASTUBaseWeapon
 {
@@ -45,6 +45,9 @@ protected:
 
 	 UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 		 TSubclassOf<UDamageType> DamageType;
+
+     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+     TSubclassOf<ASTUProjecttile> ProjecttileClass;
 
      virtual void BeginPlay() override;
      virtual void MakeShot() override;

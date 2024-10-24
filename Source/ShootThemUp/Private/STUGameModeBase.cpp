@@ -15,7 +15,6 @@
 #include "PlayerStart/STUStart.h"
 #include "STUGameInstance.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogBaseGameMode, All, All);
 
 constexpr static int32 MinRoundTimeForRespawn = 10;
 
@@ -30,8 +29,17 @@ void ASTUGameModeBase::StartPlay()
 {
     Super::StartPlay();
   //  LoadLevel();
-    SpawnBots();
-    CreateTeamsInfo();
+    TArray<AActor*> tmp;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), tmp);
+    for (auto& nId : m_vCommandIds)
+    {
+        Starts.Add(nId, tmp[nId]);
+    }
+    for (auto& nId: m_vCommandIds)
+    {
+		SpawnBots();
+    }
+	CreateTeamsInfo();
     ResetPlayers();
     CurrentRound = 1;
     StartRound();
@@ -45,7 +53,6 @@ void ASTUGameModeBase::LoadLevel()
     for (auto LevelName : LevelNames)
     {
         UGameplayStatics::LoadStreamLevel(GetWorld(), LevelName, true, true, LatentInfo);
-        UE_LOG(LogBaseGameMode, Display, TEXT("Loading %s successfull!"), *LevelName.ToString());
     }
 }
 
@@ -111,7 +118,19 @@ void  ASTUGameModeBase::ResetOnePlayer(AController* Controller)
     const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
     if (!PlayerState) return;
 
-    for (auto Start : Starts)
+    for (auto& nId : m_vCommandIds)
+    {
+        if(PlayerState->GetTeamID() != nId)
+            continue;
+        const auto PlayerStart = Cast<APlayerStart>(Starts[nId]);
+    
+        if (PlayerStart)
+        {
+            RestartPlayerAtPlayerStart(Controller, PlayerStart);
+        }
+    }
+
+    /*for (auto Start : Starts)
     {
         const auto PlayerStart = Cast<APlayerStart>(Start);
 
@@ -119,7 +138,7 @@ void  ASTUGameModeBase::ResetOnePlayer(AController* Controller)
             RestartPlayerAtPlayerStart(Controller, PlayerStart);
         else if (PlayerState->GetTeamID() == 2 && PlayerStart->PlayerStartTag == FName("RED"))
             RestartPlayerAtPlayerStart(Controller, PlayerStart);
-    }
+    }*/
 
     SetPlayerColor(Controller);
 }
@@ -127,8 +146,9 @@ void  ASTUGameModeBase::ResetOnePlayer(AController* Controller)
 void ASTUGameModeBase::CreateTeamsInfo()
 {
     if (!GetWorld()) return;
-    int32 TeamID = 1;
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
+    int64 nBotId = 1;
+    int64 nTeamsCount = m_vCommandIds.Num();
+    int64 nTeamId = 0;
     for (auto It = GetWorld()->GetControllerIterator(); It; ++It)
     {
         const auto Controller = It->Get();
@@ -136,33 +156,23 @@ void ASTUGameModeBase::CreateTeamsInfo()
         const auto PlayerState = Cast<ASTUPlayerState>(Controller->PlayerState);
         if (!PlayerState) continue;
 
-        PlayerState->SetTeamID(TeamID);
-        PlayerState->SetTeamColor(DetermineColorByTeamID(TeamID));
-        PlayerState->SetPlayerName(Controller->IsPlayerController() ? "Player" : "Bot");
+        PlayerState->SetTeamID(nTeamId);
+        PlayerState->SetTeamColor(DetermineColorByTeamID(nTeamId));
+        PlayerState->SetPlayerName(Controller->IsPlayerController() ? "Player" : "Bot" + FString::FromInt(nBotId));
+        nBotId++;
         SetPlayerColor(Controller);
-        
-
-        
-        /*for (auto Start : Starts)
-        {
-            const auto PlayerStart = Cast<APlayerStart>(Start);
-
-            if (PlayerState->GetTeamID() == 1 && PlayerStart->PlayerStartTag == FName("RED"))
-                RestartPlayerAtPlayerStart(Controller, PlayerStart);
-            else if (PlayerState->GetTeamID() == 2 && PlayerStart->PlayerStartTag == FName("BLUE"))
-                RestartPlayerAtPlayerStart(Controller, PlayerStart);
-        }*/
-        TeamID = TeamID == 1 ? 2 : 1;
+        nTeamId++;
+        if (nTeamId >= nTeamsCount)
+            nTeamId = 0;
     }
 
 }
 
 FLinearColor ASTUGameModeBase::DetermineColorByTeamID(int32 TeamID) const
 {
-    if (TeamID - 1 < GameData.TeamColors.Num())
+    if (TeamID < GameData.TeamColors.Num())
     {
-        return GameData.TeamColors[TeamID - 1];
-        UE_LOG(LogBaseGameMode, Warning, TEXT("DetermineColorByTeamID"));
+        return GameData.TeamColors[TeamID];
     }
        return GameData.DefaultTeamColor;
 }
@@ -182,19 +192,21 @@ void ASTUGameModeBase::SetPlayerColor(AController* Controller)
 
 void ASTUGameModeBase::Killed(AController* KillerController, AController* VictimController)
 {
-    const auto KillerPlayerState = KillerController ? Cast<ASTUPlayerState>(KillerController->PlayerState) : nullptr;
-    const auto VictimPlayerState = KillerController ? Cast<ASTUPlayerState>(VictimController->PlayerState) : nullptr;
-
-    if (KillerPlayerState)
+    ASTUPlayerState* KillerPlayerState = nullptr;
+    ASTUPlayerState* VictimPlayerState = nullptr;
+    if (KillerController)
     {
-        KillerPlayerState->AddKill();
+        KillerPlayerState = Cast<ASTUPlayerState>(KillerController->PlayerState);
+        if (KillerPlayerState)
+            KillerPlayerState->AddKill();
     }
-
-    if (VictimPlayerState)
+    if (VictimController)
     {
-        VictimPlayerState->AddDeath();
+        VictimPlayerState = Cast<ASTUPlayerState>(VictimController->PlayerState);
+        if (VictimPlayerState)
+            VictimPlayerState->AddDeath();
+        StartRespawn(VictimController);
     }
-    StartRespawn(VictimController);
 }
 
 void ASTUGameModeBase::LogPlayerInfo()

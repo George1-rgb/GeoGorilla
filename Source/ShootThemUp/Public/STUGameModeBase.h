@@ -38,6 +38,9 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Levels")
         TArray<FName> LevelNames;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Commands")
+        TArray<int> m_vCommandIds;
+
     UPROPERTY(EditDefaultsOnly, Category = "Game")
         FGameData GameData;
 
@@ -50,7 +53,7 @@ private:
     int32 CurrentRound = 1;
     int32 RoundCountDown = 0;
     FTimerHandle GameRoundTimerHandle;
-    TArray<AActor*> Starts;
+    TMap<int, AActor*> Starts;
     void StartRound();
     void GameTimerUpdate();
     void SpawnBots();

@@ -9,7 +9,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogWeaponComponent, All, All);
 
 constexpr static int32 WeaponNum = 2;
 
@@ -74,10 +73,13 @@ void USTUWeaponComponent::AttachWeaponToSocket(ASTUBaseWeapon* Weapon, USceneCom
 
 void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
 {
+    if (ReloadAnimInProgress)
+    {
+        StopAnimMontage(CurrentReloadAnimMontage);
+        ReloadAnimInProgress = false;
+    }
     if (WeaponIndex < 0 || WeaponIndex >= Weapons.Num())
     {
-
-        UE_LOG(LogWeaponComponent, Warning, TEXT("Invalid weapon index!"));
         return;
     }
     ACharacter* Character = Cast<ACharacter>(GetOwner());
@@ -134,6 +136,15 @@ void USTUWeaponComponent::PlayAnimMontage(UAnimMontage* Animation)
     Character->PlayAnimMontage(Animation);
 }
 
+void USTUWeaponComponent::StopAnimMontage(UAnimMontage* pAnimation)
+{
+    ACharacter* Character = Cast<ACharacter>(GetOwner());
+    if (!Character)
+        return;
+
+    Character->StopAnimMontage(pAnimation);
+}
+
 void USTUWeaponComponent::InitAnimations()
 {
 
@@ -145,8 +156,6 @@ void USTUWeaponComponent::InitAnimations()
     }
     else
     {
-
-        UE_LOG(LogWeaponComponent, Error, TEXT("Equip anim nitify is forgotten to set"));
         checkNoEntry();
     }
 
@@ -156,8 +165,6 @@ void USTUWeaponComponent::InitAnimations()
         auto ReloadFinishedNotify = AnimUtils::FindNotifyByClass<USTUReloadFinishedAnimNotify>(OneWeaponData.ReloadAnimMontage);
         if (!ReloadFinishedNotify)
         {
-
-            UE_LOG(LogWeaponComponent, Error, TEXT("Reload anim nitify is forgotten to set"));
             checkNoEntry();
         }
         ReloadFinishedNotify->OnNotified.AddUObject(this, &USTUWeaponComponent::OnReloadFinished);
@@ -179,19 +186,22 @@ void USTUWeaponComponent::OnReloadFinished(USkeletalMeshComponent* MeshComponent
     if (!Character || MeshComponent != Character->GetMesh())
         return;
 
+    if (CurrentWeapon)
+        CurrentWeapon->ChangeClip();
+
     ReloadAnimInProgress = false;
 }
 
 bool USTUWeaponComponent::CanFire() const
 {
 
-    return CurrentWeapon && !EquipAnimInProgress && !ReloadAnimInProgress;
+    return CurrentWeapon && CurrentWeapon->CanFire() && !EquipAnimInProgress && !ReloadAnimInProgress;
 }
 
 bool USTUWeaponComponent::CanEquip() const
 {
 
-    return !EquipAnimInProgress && !ReloadAnimInProgress;
+    return !EquipAnimInProgress/* && !ReloadAnimInProgress*/;
 }
 
 bool USTUWeaponComponent::CanReload() const
@@ -203,6 +213,16 @@ bool USTUWeaponComponent::CanReload() const
 void USTUWeaponComponent::Reload()
 {
     ChangeClip();
+}
+
+FVector USTUWeaponComponent::GetAimPoint()
+{
+    return CurrentWeapon->GetAimPoint();
+}
+
+FRotator USTUWeaponComponent::GetSocketRotation()
+{
+    return CurrentWeapon->GetSocketRotation();
 }
 
 void USTUWeaponComponent::OnEmptyClip(ASTUBaseWeapon* AmmoEmptyWeapon)
@@ -237,7 +257,6 @@ void USTUWeaponComponent::ChangeClip()
     PlayAnimMontage(CurrentReloadAnimMontage);
     if (CurrentReloadSound)
         UGameplayStatics::PlaySoundAtLocation(GetWorld(), CurrentReloadSound, CurrentWeapon->GetActorLocation());
-    CurrentWeapon->ChangeClip();
 }
 
 bool USTUWeaponComponent::GetCurrentWeaponUIData(FWeaponUIData& UIData) const

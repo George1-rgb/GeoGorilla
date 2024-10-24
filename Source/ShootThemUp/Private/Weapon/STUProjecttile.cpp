@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Weapon/Components/STUWeaponFXComponent.h"
 #include "Sound/SoundBase.h"
+#include "DamageTypes/ProjectTileDamageType.h"
+#include "DamageTypes/RifileDamageType.h"
 
 
 ASTUProjecttile::ASTUProjecttile()
@@ -47,17 +49,27 @@ void ASTUProjecttile::OnProjectileHit(
     if (!GetWorld())
         return;
     MovementComponent->StopMovementImmediately();
+   
+    if (!m_bRifile)
+    {
+        // make damage
+        UGameplayStatics::ApplyRadialDamage(GetWorld(), //
+            DamageAmount,                               //
+            GetActorLocation(),                         //
+            DamageRadius,                               //
+            DamageType,                 //
+            {},                                         //
+            this,                                       //
+            GetController(),                            //
+            DoFullDamage);
 
-    // make damage
-    UGameplayStatics::ApplyRadialDamage(GetWorld(), //
-        DamageAmount,                               //
-        GetActorLocation(),                         //
-        DamageRadius,                               //
-        DamageType,                 //
-        {},                                         //
-        this,                                       //
-        GetController(),                            //
-        DoFullDamage);
+    }
+    else
+    {
+        const auto DamagedActor = m_hitResult.GetActor();
+        FVector HitFromDirection = m_hitResult.TraceStart - m_hitResult.TraceStart;
+        UGameplayStatics::ApplyPointDamage(DamagedActor, DamageAmount, HitFromDirection, m_hitResult, GetController(), this, DamageType);
+    }
    // DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
     WeaponFXComponent->PlayImpactFX(Hit);
     if (FireSound)

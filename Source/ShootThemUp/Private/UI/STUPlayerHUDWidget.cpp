@@ -7,7 +7,6 @@
 #include "STUUtils.h"
 #include "../Weapon/STUBaseWeapon.h"
 #include "Kismet/GameplayStatics.h"
-DEFINE_LOG_CATEGORY_STATIC(PlayerHUD, All, All);
 
 
 float USTUPlayerHUDWidget::GetHelthPercent() const
@@ -49,6 +48,11 @@ bool USTUPlayerHUDWidget::IsPlayerSpectating() const
 
     const auto Controller = GetOwningPlayer();
     return Controller && Controller->GetStateName() == NAME_Spectating;
+}
+
+bool USTUPlayerHUDWidget::IsShowCross() const
+{
+    return (IsPlayerAlive() && !m_bAiming);
 }
 
 void USTUPlayerHUDWidget::NativeOnInitialized()
@@ -95,6 +99,12 @@ void USTUPlayerHUDWidget::OnHeadShot()
         UGameplayStatics::PlaySound2D(GetWorld(), HeadShotSound);
 }
 
+void USTUPlayerHUDWidget::OnAiming(bool bAiming)
+{
+    
+    m_bAiming = bAiming;
+}
+
 void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
 {
     const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(NewPawn);
@@ -110,6 +120,7 @@ void USTUPlayerHUDWidget::OnNewPawn(APawn* NewPawn)
 		{
 			pCharacter->OnDamageActor.AddUObject(this, &USTUPlayerHUDWidget::OnDamageActor);
 			pCharacter->OnHeadShoot.AddUObject(this, &USTUPlayerHUDWidget::OnHeadShot);
+			pCharacter->OnAiming.AddUObject(this, &USTUPlayerHUDWidget::OnAiming);
 		}
     }
 }

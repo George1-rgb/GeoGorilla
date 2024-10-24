@@ -6,7 +6,6 @@
 #include "UI/STUBaseWidget.h"
 #include "STUGameModeBase.h"
 #include "Kismet/GameplayStatics.h"
-DEFINE_LOG_CATEGORY_STATIC(LogSTUGameHUD, All, All);
 
 void ASTUGameHUD::DrawHUD() 
 {
@@ -74,5 +73,4 @@ void ASTUGameHUD::OnMatchStateChanged(ESTUMatchState State)
         CurrentWidget->SetVisibility(ESlateVisibility::Visible);
         CurrentWidget->Show();
     }
-    UE_LOG(LogSTUGameHUD, Display, TEXT("Match state change: %s"), *UEnum::GetValueAsString(State));
 }

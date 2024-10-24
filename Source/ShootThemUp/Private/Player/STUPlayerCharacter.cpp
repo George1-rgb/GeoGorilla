@@ -8,6 +8,10 @@
 #include "Components/STUWeaponComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Weapon/STUBaseWeapon.h"
+#include "Kismet/KismetMathLibrary.h"
+
 ASTUPlayerCharacter::ASTUPlayerCharacter(const FObjectInitializer& ObjInit) : Super(ObjInit)
 {
     // Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -36,6 +40,17 @@ void ASTUPlayerCharacter::BeginPlay()
     CameraCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ASTUPlayerCharacter::OnCameraCollisionEndOverlap);
 }
 
+void ASTUPlayerCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if(m_bAiming)
+    {
+        FVector vSocketPoint = WeaponComponent->GetAimPoint();
+        CameraComponent->SetWorldLocation(vSocketPoint);
+    }
+}
+
 void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -55,6 +70,9 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &USTUWeaponComponent::StopFire);
     PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent, &USTUWeaponComponent::NextWeapon);
     PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &USTUWeaponComponent::Reload);
+
+    PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASTUPlayerCharacter::AimOn);
+    PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASTUPlayerCharacter::AimOff);
 
 }
 
@@ -84,6 +102,24 @@ void ASTUPlayerCharacter::OnStopRunning()
     WantsToRun = false;
 }
 
+void ASTUPlayerCharacter::AimOn()
+{
+    OnAiming.Broadcast(true);
+    m_LastSACPoint = CameraComponent->GetRelativeLocation();
+    CameraComponent->SetupAttachment(WeaponComponent->GetCurrentWeapon()->GetWeaponMesh());
+    CameraComponent->SetFieldOfView(60.0f);
+    m_bAiming = true;
+}
+
+void ASTUPlayerCharacter::AimOff()
+{
+    OnAiming.Broadcast(false);
+    CameraComponent->SetFieldOfView(90.0f);
+    m_bAiming = false;
+    CameraComponent->SetRelativeLocation(m_LastSACPoint);
+    CameraComponent->SetupAttachment(SpringArmComponent);
+}
+
 void ASTUPlayerCharacter::OnDeath()
 {
     Super::OnDeath();
@@ -95,7 +131,7 @@ void ASTUPlayerCharacter::OnDeath()
 
 bool ASTUPlayerCharacter::IsRunning() const
 {
-    return WantsToRun && IsMovingForward && !GetVelocity().IsZero();
+    return WantsToRun && IsMovingForward && !GetVelocity().IsZero() && !m_bAiming;
 }
 
 void ASTUPlayerCharacter::MakeDamage()
@@ -111,13 +147,13 @@ void ASTUPlayerCharacter::HeadShot()
 void ASTUPlayerCharacter::OnCameraCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    CheckCameraOverlap();
+   // CheckCameraOverlap();
 }
 
 void ASTUPlayerCharacter::OnCameraCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
     int32 OtherBodyIndex)
 {
-    CheckCameraOverlap();
+    //CheckCameraOverlap();
 }
 
 void ASTUPlayerCharacter::CheckCameraOverlap()

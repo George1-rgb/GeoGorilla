@@ -7,7 +7,6 @@
 #include "STUGameInstance.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Menu/STUMenuGameModeBase.h"
-DEFINE_LOG_CATEGORY_STATIC(LogSTUMenuWidget, All, All);
 void USTUMenuWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -39,7 +38,6 @@ void USTUMenuWidget::StartGame()
 
 	if (STUGameInstance->GetStartupLevelName().IsNone())
 	{
-		UE_LOG(LogSTUMenuWidget, Display, TEXT("Level name is NONE"));
 		return;
 	}
 	UGameplayStatics::OpenLevel(this, STUGameInstance->GetStartupLevelName());

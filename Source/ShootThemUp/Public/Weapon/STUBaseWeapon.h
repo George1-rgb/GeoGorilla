@@ -26,6 +26,7 @@ public:
 
     void ChangeClip();
     bool CanReload() const;
+    bool CanFire() const;
 
     virtual void StartFire();
     virtual void StopFire();
@@ -36,13 +37,19 @@ public:
     bool TryToAddAmmo(int32 ClipAmount);
     bool IsAmmoEmpty() const;
     bool IsAmmoFull() const;
-    
+
+    FVector GetAimPoint();
+    FRotator GetSocketRotation();
+    USkeletalMeshComponent* GetWeaponMesh() { return WeaponMesh; }
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     USkeletalMeshComponent* WeaponMesh;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     FName MuzzleSocketName = "MuzzleSocket";
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+    FName AimSocketName = "AimSocket";
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     float TraceMaxDistance = 15000.0f;

@@ -26,7 +26,7 @@ protected:
     USTUHealthComponent* HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-    USTUWeaponComponent* WeaponComponent;
+	USTUWeaponComponent* WeaponComponent;
 
 	virtual void BeginPlay() override;
 	virtual void OnHealthChanged(float Health, float HealthDelta);

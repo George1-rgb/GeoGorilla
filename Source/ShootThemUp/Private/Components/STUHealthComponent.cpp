@@ -13,7 +13,6 @@
 #include "../Weapon/DamageTypes/ProjectTileDamageType.h"
 #include "../Weapon/DamageTypes/RifileDamageType.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All);
 
 USTUHealthComponent::USTUHealthComponent()
 {
@@ -75,7 +74,7 @@ void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, 
 	if (pPlayerCharacter)
 		pPlayerCharacter->MakeDamage();
 
-    if (BoneName == HeadShotBoneName)
+    if (BoneName == HeadShotBoneName && BoneName != FName("None"))
     {
         if (pPlayerCharacter)
             pPlayerCharacter->HeadShot();
@@ -87,8 +86,8 @@ void USTUHealthComponent::OnTakePointDamage(AActor* DamagedActor, float Damage, 
     DefaultTakeDamage(InstigatedBy);
 }
 
-void USTUHealthComponent::OnTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, 
-    class AController* InstigatedBy, AActor* DamageCauser)
+void USTUHealthComponent::OnTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin,
+    const FHitResult& HitInfo, class AController* InstigatedBy, AActor* DamageCauser)
 {
     if (Damage <= 0.0f || IsDead() || !GetWorld())
         return;

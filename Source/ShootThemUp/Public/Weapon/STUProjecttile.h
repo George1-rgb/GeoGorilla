@@ -19,7 +19,7 @@ class SHOOTTHEMUP_API ASTUProjecttile : public AActor
 public:
     ASTUProjecttile();
     void SetShotDirection(const FVector& Direction) { ShotDirection = Direction; }
-
+    void SetHitResult(const FHitResult& res) { m_hitResult = res; }
 protected:
     UPROPERTY(VisibleAnywhere, Category = "Weapon")
     USphereComponent* CollisionComponent;
@@ -39,6 +39,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Weapon")
     float LifeSeconds = 5.0f;
 
+    UPROPERTY(EditAnywhere, Category = "Weapon")
+    bool m_bRifile = false;
+
     
     UPROPERTY(VisibleAnywhere, Category = "VFX")
     USTUWeaponFXComponent* WeaponFXComponent;
@@ -53,7 +56,7 @@ protected:
 
 private:
     FVector ShotDirection;
-
+    FHitResult m_hitResult;
     UFUNCTION()
     void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse,
         const FHitResult& Hit);

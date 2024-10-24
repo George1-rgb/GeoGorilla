@@ -23,7 +23,8 @@ public:
     void StopFire();
     virtual void NextWeapon();
     void Reload();
-
+    FVector GetAimPoint();
+    FRotator GetSocketRotation();
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
     bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
     bool TryToAddAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType, int32 ClipAmount);
@@ -75,6 +76,7 @@ private:
    
 
     void PlayAnimMontage(UAnimMontage* Animation);
+    void StopAnimMontage(UAnimMontage* pAnimation);
     void InitAnimations();
 
     void OnEquipFinished(USkeletalMeshComponent* MeshComponent);

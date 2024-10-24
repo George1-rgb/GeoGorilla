@@ -6,8 +6,6 @@
 #include "Components/STUWeaponComponent.h"
 #include "STUUtils.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogAmmoPickup, All, All);
-
 bool ASTUAmmoPickup::GivePickupTo(APawn* PlayerPawn) 
 {
     const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(PlayerPawn);

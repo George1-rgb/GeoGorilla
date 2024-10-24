@@ -12,7 +12,6 @@
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
 ASTUBaseWeapon::ASTUBaseWeapon()
 {
@@ -130,8 +129,6 @@ void ASTUBaseWeapon::ChangeClip()
     {
         if (CurrentAmmo.Clips == 0)
         {
-
-            UE_LOG(LogBaseWeapon, Warning, TEXT("!!!None clips!!!"));
             return;
         }
         CurrentAmmo.Clips--;
@@ -146,17 +143,31 @@ bool ASTUBaseWeapon::CanReload() const
     return CurrentAmmo.Bullets < DefaultAmmo.Bullets && CurrentAmmo.Clips > 0;
 }
 
+bool ASTUBaseWeapon::CanFire() const
+{
+    return CurrentAmmo.Bullets != 0;
+}
+
 void ASTUBaseWeapon::LogAmmo()
 {
 
     FString AmmoInfo = "Ammo: " + FString::FromInt(CurrentAmmo.Bullets) + " /";
     AmmoInfo += CurrentAmmo.Infinite ? "Infinite" : FString::FromInt(CurrentAmmo.Clips);
-    UE_LOG(LogBaseWeapon, Display, TEXT("%s"), *AmmoInfo);
 }
 
 bool ASTUBaseWeapon::IsAmmoFull() const
 {
     return CurrentAmmo.Clips == DefaultAmmo.Clips && CurrentAmmo.Bullets == DefaultAmmo.Bullets;
+}
+
+FVector ASTUBaseWeapon::GetAimPoint()
+{
+    return WeaponMesh->GetSocketLocation(AimSocketName);
+}
+
+FRotator ASTUBaseWeapon::GetSocketRotation()
+{
+    return WeaponMesh->GetSocketRotation(AimSocketName);
 }
 
 bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
@@ -165,7 +176,6 @@ bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
         return false;
     if (IsAmmoEmpty())
     {
-       // UE_LOG(LogBaseWeapon, Display, TEXT("Ammo was empty"));
         CurrentAmmo.Clips = FMath::Clamp(ClipAmount, 0, DefaultAmmo.Clips + 1);
         OnClipEmpty.Broadcast(this);
     }
@@ -175,19 +185,16 @@ bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
         if (DefaultAmmo.Clips - NextClipsAmount >= 0)
         {
             CurrentAmmo.Clips = NextClipsAmount;
-           // UE_LOG(LogBaseWeapon, Display, TEXT("Clips were added"));
         }
         else
         {
             CurrentAmmo.Clips = DefaultAmmo.Clips;
             CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-          //  UE_LOG(LogBaseWeapon, Display, TEXT("Ammo is full now"));
         }
     }
     else
     {
         CurrentAmmo.Bullets = DefaultAmmo.Bullets;
-        UE_LOG(LogBaseWeapon, Display, TEXT("Bullets were added"));
     }
     return true;
 }

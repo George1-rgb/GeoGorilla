@@ -7,7 +7,6 @@
 #include "STUGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogSTUPauseWidget, All, All);
 
 void USTUPauseWidget::NativeOnInitialized()
 {
@@ -37,7 +36,6 @@ void USTUPauseWidget::OnMainMenu()
 
 	if (STUGameInstance->GetMainMenuLevelName().IsNone())
 	{
-		UE_LOG(LogSTUPauseWidget, Display, TEXT("Level name is NONE"));
 		return;
 	}
 	UGameplayStatics::OpenLevel(this, STUGameInstance->GetMainMenuLevelName());

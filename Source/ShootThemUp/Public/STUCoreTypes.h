@@ -126,5 +126,6 @@ enum class ESTUMenuState : uint8
 };
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuStateChangedSignature, ESTUMenuState);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAiming, bool);
 DECLARE_MULTICAST_DELEGATE(FOnDamageActor);
 DECLARE_MULTICAST_DELEGATE(FOnHeadShot);
